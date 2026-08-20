@@ -743,16 +743,36 @@ Recommended Action: "Do not share. Report to I4C/1930."
 
 ### 13.3 References
 
-- DFDC (Deepfake Detection Challenge) Dataset
-- FaceForensics++ Dataset
-- Celeb-DF v2 Dataset
-- ASVspoof 2019 Challenge
-- FakeAVCeleb & WaveFake Datasets
-- DeepFakeBench Benchmark
-- Digital Personal Data Protection Act, 2023 (alignment)
-- WCAG 2.1 Accessibility Guidelines
+**Datasets**
+- FaceForensics++ — https://github.com/ondyari/FaceForensics
+- DFDC (Deepfake Detection Challenge) — https://ai.meta.com/datasets/dfdc
+- Celeb-DF v2 — https://cse.buffalo.edu/~siweilyu/celeb-deepfakeforensics.html
+- ASVspoof 2019 — https://www.asvspoof.org
+- FakeAVCeleb — https://github.com/DASH-Lab/FakeAVCeleb
+- WaveFake — https://github.com/RUB-SysSec/WaveFake
+- DeepFakeBench — https://github.com/SCLBD/DeepfakeBench
+- DeepFakeTIMIT — https://github.com/pavelkorshunov/deepfakes-timit
+
+**Threat Intelligence**
+- PhishTank — https://phishtank.org
+- Google Safe Browsing — https://safebrowsing.google.com
+- VirusTotal — https://www.virustotal.com
+
+**AI & Research**
+- Gemini API Documentation — https://ai.google.dev
+- EasyOCR — https://github.com/JaidedAI/EasyOCR
+- OpenCV — https://opencv.org
+- TimeSformer — https://proceedings.mlr.press/v139/bertasius21a/bertasius21a-supp.pdf
+- Video Swin Transformer — https://arxiv.org/abs/2106.13230
+- Whisper — https://github.com/openai/whisper
+- Wav2Vec2 — https://arxiv.org/abs/2006.11477
+
+**Policy & Frameworks**
+- Digital Personal Data Protection Act, 2023 — https://www.meity.gov.in
+- Digital India Mission — https://www.digitalindia.gov.in
+- I4C / 1930 Cyber Fraud Reporting — https://cybercrime.gov.in
+- WCAG 2.1 Accessibility Guidelines — https://www.w3.org/TR/WCAG21/
 - AWS Well-Architected Framework
-- I4C / 1930 Cyber Fraud Reporting Ecosystem
 
 ---
 

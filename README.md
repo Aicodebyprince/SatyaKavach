@@ -4,7 +4,7 @@
 
 **SatyaKavach** is a citizen-first, multimodal AI platform that detects deepfake and manipulated media across **images, videos, and audio** — and delivers a unified **Trust Score**, an evidence-backed explanation, and a recommended action.
 
-> 🏆 Built for **Omnikon National Hackathon 2026** · Problem Statement `Omni_CyberTech_4` · Team **Codeators**
+> 🏆 Built for **Omnikon National Hackathon 2026** · Problem Statement `Omni_CyberTech_4` · Theme **CyberTech** · Team **Codeators**
 
 ---
 
@@ -66,6 +66,9 @@ FaceForensics++ · Celeb-DF v2 · DFDC · DeepFakeTIMIT · ASVspoof 2019 · Fake
 - **Phase C** — Nationwide scale: real-time video, admin dashboard, gov partnerships
 
 ## Team — Codeators
+
+- **Prince Sherathiya**
+- **Soham Shetye**
 
 > *SatyaKavach: सत्य (truth) + कवच (armor) — armor for the truth.*
 
