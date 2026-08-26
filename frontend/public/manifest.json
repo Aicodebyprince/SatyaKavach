@@ -1,0 +1,17 @@
+{
+  "name": "SatyaKavach — सत्य कवच",
+  "short_name": "SatyaKavach",
+  "description": "AI-powered deepfake and manipulated media detection",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05070D",
+  "theme_color": "#05070D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

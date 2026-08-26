@@ -1,0 +1,34 @@
+# ── Secrets & environment ────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+backend/.env
+**/.env
+
+# ── Python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.hypothesis/
+htmlcov/
+.coverage
+
+# ── Local runtime data (SQLite fallback + local object storage) ─────
+backend/satya.local.db
+backend/*.db
+backend/local_storage/
+
+# ── Node / frontend ──────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+.eslintcache
+
+# ── Editors & OS ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
