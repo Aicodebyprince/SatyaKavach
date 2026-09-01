@@ -8,8 +8,24 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
+
+def _async_db_url(url: str) -> str:
+    """Ensure the URL uses the asyncpg driver.
+
+    Accepts plain 'postgresql://' / 'postgres://' (as given by Neon) and
+    rewrites to 'postgresql+asyncpg://' so SQLAlchemy picks the async driver.
+    """
+    if url.startswith("postgresql://") or url.startswith("postgres://"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1).replace(
+            "postgres://", "postgresql+asyncpg://", 1
+        )
+    if url.startswith("postgresql+asyncpg://"):
+        return url
+    return url
+
+
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    _async_db_url(settings.DATABASE_URL),
     echo=settings.DEBUG,
     pool_size=20,
     max_overflow=10,
