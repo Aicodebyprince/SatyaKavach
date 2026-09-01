@@ -10,18 +10,32 @@ from app.core.config import settings
 
 
 def _async_db_url(url: str) -> str:
-    """Ensure the URL uses the asyncpg driver.
+    """Normalize a DATABASE_URL for SQLAlchemy + asyncpg.
 
-    Accepts plain 'postgresql://' / 'postgres://' (as given by Neon) and
-    rewrites to 'postgresql+asyncpg://' so SQLAlchemy picks the async driver.
+    - Accepts plain 'postgresql://' / 'postgres://' (as given by Neon) and
+      rewrites to 'postgresql+asyncpg://' so the async driver is used.
+    - Strips 'sslmode=...' from the query string (asyncpg doesn't accept it)
+      and re-adds it as 'ssl=require' so encrypted connections still work.
     """
+    from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+
+    url = url.strip()
     if url.startswith("postgresql://") or url.startswith("postgres://"):
-        return url.replace("postgresql://", "postgresql+asyncpg://", 1).replace(
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1).replace(
             "postgres://", "postgresql+asyncpg://", 1
         )
-    if url.startswith("postgresql+asyncpg://"):
+    if not url.startswith("postgresql+asyncpg://"):
         return url
-    return url
+
+    parts = urlsplit(url)
+    query = parse_qsl(parts.query, keep_blank_values=True)
+    sslmode = next((v for k, v in query if k.lower() == "sslmode"), None)
+    query = [(k, v) for k, v in query if k.lower() != "sslmode"]
+    if sslmode in ("require", "verify-ca", "verify-full", "prefer"):
+        query.append(("ssl", "require"))
+    return urlunsplit(
+        (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+    )
 
 
 engine = create_async_engine(
