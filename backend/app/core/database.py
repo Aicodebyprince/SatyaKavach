@@ -14,8 +14,11 @@ def _async_db_url(url: str) -> str:
 
     - Accepts plain 'postgresql://' / 'postgres://' (as given by Neon) and
       rewrites to 'postgresql+asyncpg://' so the async driver is used.
-    - Strips 'sslmode=...' from the query string (asyncpg doesn't accept it)
-      and re-adds it as 'ssl=require' so encrypted connections still work.
+    - asyncpg only understands a small set of URL query params. Provider URLs
+      (Neon/Render) append params like 'sslmode', 'channel_binding',
+      'target_session_attrs' that asyncpg rejects — those are stripped.
+    - If the provider requested SSL ('sslmode=require' etc.), it is re-added
+      as 'ssl=require' which asyncpg accepts.
     """
     from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
@@ -29,12 +32,27 @@ def _async_db_url(url: str) -> str:
 
     parts = urlsplit(url)
     query = parse_qsl(parts.query, keep_blank_values=True)
+
     sslmode = next((v for k, v in query if k.lower() == "sslmode"), None)
-    query = [(k, v) for k, v in query if k.lower() != "sslmode"]
-    if sslmode in ("require", "verify-ca", "verify-full", "prefer"):
-        query.append(("ssl", "require"))
+    wants_ssl = sslmode in ("require", "verify-ca", "verify-full", "prefer")
+
+    # asyncpg-supported query params (everything else is stripped)
+    supported = {
+        "user", "password", "host", "port", "database",
+        "ssl", "sslrootcert", "sslkey", "sslcert",
+        "connect_timeout", "statement_cache_size", "max_cached_statement_lifetime",
+        "max_cacheable_statement_size", "command_timeout", "server_settings",
+        "tcp_user_timeout", "application_name",
+    }
+    cleaned = [(k, v) for k, v in query if k.lower() in supported]
+
+    # Ensure SSL is requested when the provider URL asked for it
+    has_ssl = any(k.lower() == "ssl" for k, _ in cleaned)
+    if wants_ssl and not has_ssl:
+        cleaned.append(("ssl", "require"))
+
     return urlunsplit(
-        (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+        (parts.scheme, parts.netloc, parts.path, urlencode(cleaned), parts.fragment)
     )
 
 
