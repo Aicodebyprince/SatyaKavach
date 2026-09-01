@@ -3,8 +3,8 @@ SatyaKavach - Application Configuration
 All settings loaded from environment variables with sensible defaults.
 """
 
-from typing import Optional
-from pydantic_settings import BaseSettings
+from typing import Optional, Annotated
+from pydantic_settings import BaseSettings, NoDecode
 from pydantic import ConfigDict, field_validator
 
 
@@ -73,12 +73,19 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 10
 
     # CORS — comma-separated in env, defaults include local dev
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:4173"]
+    CORS_ORIGINS: Annotated[list[str], NoDecode] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:4173"]
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def parse_cors(cls, v):
         if isinstance(v, str):
+            v = v.strip()
+            if v.startswith("["):
+                try:
+                    import json
+                    return [str(o).strip() for o in json.loads(v)]
+                except Exception:
+                    pass
             return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
 

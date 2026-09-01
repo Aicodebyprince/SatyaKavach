@@ -27,6 +27,6 @@ services:
       - key: S3_REGION
         value: "auto"
       - key: CORS_ORIGINS
-        value: "*"
+        value: '["*"]'
       - key: REDIS_URL
         sync: false
