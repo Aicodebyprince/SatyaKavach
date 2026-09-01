@@ -2,9 +2,11 @@ services:
   - type: web
     name: satyakavach-api
     runtime: python
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -13,7 +15,7 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: DEMO_MODE
-        value: "false"
+        value: "true"
       - key: S3_ENDPOINT
         sync: false
       - key: S3_ACCESS_KEY
@@ -22,7 +24,9 @@ services:
         sync: false
       - key: S3_BUCKET
         value: "satyakavach-media"
-      - key: AWS_DEFAULT_REGION
+      - key: S3_REGION
         value: "auto"
       - key: CORS_ORIGINS
-        value: "https://satyakavach.vercel.app,http://localhost:5173"
+        value: "*"
+      - key: REDIS_URL
+        sync: false
