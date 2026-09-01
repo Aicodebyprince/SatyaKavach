@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     APP_DESCRIPTION: str = "AI-Powered Deepfake & Manipulated Media Detection"
     DEBUG: bool = False
-    DEMO_MODE: bool = True  # Use mock AI responses for demo
+    DEMO_MODE: bool = False  # Use real ONNX model inference
 
     # Server
     HOST: str = "0.0.0.0"

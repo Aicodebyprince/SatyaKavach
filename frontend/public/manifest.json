@@ -1,17 +1,29 @@
 {
   "name": "SatyaKavach — सत्य कवच",
   "short_name": "SatyaKavach",
-  "description": "AI-powered deepfake and manipulated media detection",
+  "description": "AI-Powered Deepfake & Manipulated Media Detection — मीडिया की सच्चाई जानें",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#05070D",
-  "theme_color": "#05070D",
-  "orientation": "portrait",
+  "background_color": "#0a0a14",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "hi",
+  "dir": "ltr",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["security", "utilities"],
+  "prefer_related_applications": false
 }

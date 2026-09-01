@@ -14,6 +14,8 @@ from app.services.ai.image_detector import ImageVerdict
 from app.services.ai.video_detector import VideoVerdict
 from app.services.ai.audio_detector import AudioVerdict
 from app.services.threat_intel.service import ThreatVerdict
+from app.services.forensics.metadata_analyzer import MetadataVerdict
+from app.services.forensics.screenshot_analyzer import ScreenshotVerdict
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +50,8 @@ class RiskEngine:
         "audio": settings.RISK_WEIGHT_AUDIO,
         "ocr_nlp": settings.RISK_WEIGHT_OCR_NLP,
         "threat": settings.RISK_WEIGHT_THREAT,
+        "metadata": 0.10,
+        "screenshot": 0.10,
     }
 
     def compute_trust_score(
@@ -58,6 +62,8 @@ class RiskEngine:
         audio_verdict: Optional[AudioVerdict] = None,
         threat_verdict: Optional[ThreatVerdict] = None,
         ocr_nlp_score: Optional[float] = None,
+        metadata_verdict: Optional[MetadataVerdict] = None,
+        screenshot_verdict: Optional[ScreenshotVerdict] = None,
     ) -> TrustResult:
         """
         Compute the Unified Trust Score from all available signals.
@@ -92,6 +98,14 @@ class RiskEngine:
         if ocr_nlp_score is not None:
             signals["ocr_nlp"] = ocr_nlp_score
 
+        if metadata_verdict is not None:
+            # Metadata: risk_score is already 0-1 (higher = more suspicious)
+            signals["metadata"] = metadata_verdict.risk_score
+
+        if screenshot_verdict is not None:
+            # Screenshot: risk_score is already 0-1 (higher = more suspicious)
+            signals["screenshot"] = screenshot_verdict.risk_score
+
         # ── Compute weighted risk (re-normalize over available signals) ──
         if not signals:
             # No signals available
@@ -119,13 +133,15 @@ class RiskEngine:
 
         # ── Build model breakdown ──
         model_breakdown = self._build_model_breakdown(
-            image_verdict, video_verdict, audio_verdict, threat_verdict, signals
+            image_verdict, video_verdict, audio_verdict, threat_verdict,
+            metadata_verdict, screenshot_verdict, signals
         )
 
         # ── Build evidence report ──
         evidence_report = self._build_evidence_report(
             trust_score, verdict, signals, image_verdict,
-            video_verdict, audio_verdict, threat_verdict
+            video_verdict, audio_verdict, threat_verdict,
+            metadata_verdict, screenshot_verdict
         )
 
         duration_ms = int((time.time() - start_time) * 1000)
@@ -169,7 +185,7 @@ class RiskEngine:
             confidences.append(audio.confidence)
         return sum(confidences) / len(confidences) if confidences else 0.7
 
-    def _build_model_breakdown(self, image, video, audio, threat, signals) -> dict:
+    def _build_model_breakdown(self, image, video, audio, threat, metadata, screenshot, signals) -> dict:
         """Build per-model score breakdown for transparency."""
         breakdown = {}
 
@@ -216,6 +232,25 @@ class RiskEngine:
                 ],
             }
 
+        if metadata:
+            breakdown["metadata"] = {
+                "risk_score": metadata.risk_score,
+                "editing_detected": metadata.editing_detected,
+                "risk_value": signals.get("metadata", 0),
+                "findings": metadata.findings,
+                "device_info": metadata.device_info,
+                "exif_summary": metadata.exif_summary,
+            }
+
+        if screenshot:
+            breakdown["screenshot"] = {
+                "risk_score": screenshot.risk_score,
+                "is_screenshot": screenshot.is_screenshot,
+                "risk_value": signals.get("screenshot", 0),
+                "findings": screenshot.findings,
+                "artifacts": screenshot.artifacts,
+            }
+
         breakdown["signal_weights"] = {
             k: self.WEIGHTS[k] for k in signals
         }
@@ -223,7 +258,7 @@ class RiskEngine:
 
         return breakdown
 
-    def _build_evidence_report(self, trust_score, verdict, signals, image, video, audio, threat) -> dict:
+    def _build_evidence_report(self, trust_score, verdict, signals, image, video, audio, threat, metadata, screenshot) -> dict:
         """Build the evidence report for explainability."""
         findings = []
         all_artifacts = []
@@ -299,6 +334,56 @@ class RiskEngine:
                     "severity": "low",
                     "message": "No threats detected from security vendors",
                 })
+
+        # Metadata Forensics findings
+        if metadata and "metadata" in signals:
+            high_meta = [f for f in metadata.findings if f.get("severity") == "high"]
+            if high_meta:
+                for f in high_meta:
+                    findings.append({
+                        "signal": "Metadata Forensics",
+                        "severity": "high",
+                        "message": f"{f['message']}",
+                        "detail": f.get("detail", ""),
+                    })
+            elif metadata.editing_detected:
+                findings.append({
+                    "signal": "Metadata Forensics",
+                    "severity": "medium",
+                    "message": f"Editing software detected in metadata (risk: {metadata.risk_score:.0%})",
+                })
+            else:
+                findings.append({
+                    "signal": "Metadata Forensics",
+                    "severity": "low",
+                    "message": f"Metadata appears clean (risk: {metadata.risk_score:.0%})",
+                })
+            all_artifacts.extend(f"[Metadata] {f['message']}" for f in high_meta)
+
+        # Screenshot Forensics findings
+        if screenshot and "screenshot" in signals:
+            high_ss = [f for f in screenshot.findings if f.get("severity") == "high"]
+            if high_ss:
+                for f in high_ss:
+                    findings.append({
+                        "signal": "Screenshot Forensics",
+                        "severity": "high",
+                        "message": f"{f['message']}",
+                        "detail": f.get("detail", ""),
+                    })
+            elif screenshot.is_screenshot:
+                findings.append({
+                    "signal": "Screenshot Forensics",
+                    "severity": "info",
+                    "message": f"Screenshot detected with {len(screenshot.findings)} analysis checks (risk: {screenshot.risk_score:.0%})",
+                })
+            else:
+                findings.append({
+                    "signal": "Screenshot Forensics",
+                    "severity": "low",
+                    "message": f"No screenshot manipulation detected (risk: {screenshot.risk_score:.0%})",
+                })
+            all_artifacts.extend(f"[Screenshot] {a}" for a in screenshot.artifacts)
 
         # Build summary
         high_findings = [f for f in findings if f["severity"] == "high"]

@@ -17,6 +17,7 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, TokenResponse, AnonymousSession
+from app.api.v1.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -136,7 +137,7 @@ async def refresh_token(refresh_token: str, db: AsyncSession = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    user: User = Depends(lambda db=Depends(get_db): None),  # Simplified
+    user: User = Depends(get_current_user),
 ):
-    """Get current user info. (Placeholder — wire up with deps.get_current_user)"""
-    raise HTTPException(status_code=501, detail="Not yet wired")
+    """Get current user info."""
+    return UserResponse.model_validate(user)
