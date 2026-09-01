@@ -1,4 +1,4 @@
-const CACHE_NAME = 'satyakavach-v1';
+const CACHE_NAME = 'satyakavach-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
