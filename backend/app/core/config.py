@@ -3,8 +3,8 @@ SatyaKavach - Application Configuration
 All settings loaded from environment variables with sensible defaults.
 """
 
-from typing import Optional, Annotated
-from pydantic_settings import BaseSettings, NoDecode
+from typing import Optional
+from pydantic_settings import BaseSettings
 from pydantic import ConfigDict, field_validator
 
 
@@ -72,22 +72,19 @@ class Settings(BaseSettings):
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 10
 
-    # CORS — comma-separated in env, defaults include local dev
-    CORS_ORIGINS: Annotated[list[str], NoDecode] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:4173"]
+    # CORS — comma-separated or JSON array in env, defaults include local dev
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:4173"
 
-    @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors(cls, v):
-        if isinstance(v, str):
-            v = v.strip()
-            if v.startswith("["):
-                try:
-                    import json
-                    return [str(o).strip() for o in json.loads(v)]
-                except Exception:
-                    pass
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse CORS_ORIGINS into a list (handles comma-separated and JSON array)."""
+        v = self.CORS_ORIGINS.strip()
+        if not v:
+            return ["*"]
+        if v.startswith("["):
+            import json
+            return [str(o).strip() for o in json.loads(v)]
+        return [origin.strip() for origin in v.split(",") if origin.strip()]
 
     model_config = ConfigDict(
         env_file=".env",
