@@ -50,17 +50,6 @@ export default function Navbar() {
               <Icon name="globe" className="h-3.5 w-3.5 text-saffron-400" />
               {lang === 'hi' ? 'हिंदी' : 'EN'}
             </button>
-
-            <Link
-              to="/login"
-              className={`ml-1 hidden rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 md:inline-flex ${
-                isActive('/login')
-                  ? 'bg-saffron-500/10 text-saffron-400'
-                  : 'btn-outline !px-4 !py-2'
-              }`}
-            >
-              {t('login', lang)}
-            </Link>
           </div>
         </div>
       </div>
