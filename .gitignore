@@ -32,3 +32,13 @@ frontend/dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# ── ML model weights (too large for Git, ~300MB) ──────────────────
+backend/app/services/ai/model_weights/*.onnx
+backend/app/services/ai/model_weights/*.pth
+training/datasets/
+training/models/
+training/**/__pycache__/
+training/**/train_log.txt
+training/run_efficientnet.sh
+*.log
